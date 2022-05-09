@@ -45,22 +45,30 @@ public class Spring {
     }
 
     public Spring inSeries(Spring that) {
-        //TODO
-        return null;
+        return inSeries(this, that);
     }
 
     public Spring inParallel(Spring that) {
-        //TODO
-        return null;
+        return inParallel(this, that);
     }
 
     // utility methods
+    private Spring inSeries(Spring spring1, Spring spring2) {
+        double new_k = (spring1.k * spring2.k) / (spring1.k + spring2.k);
+        return new Spring(new_k);
+    }
+
+    private Spring inParallel(Spring spring1, Spring spring2) {
+    double new_k = spring1.k + spring2.k;
+        return new Spring(new_k);
+    }
+
     private ArrayList<Double> getAllCoordinates(double t0, double t1, double dt, double x0, double v0, Double mass) {
         double currentTime = t0;
         double m = mass == null ? 1 : mass;             // by default 1 if not provided
         double omega = Math.sqrt(k / m);
         double c1 = x0;
-        double c2 = -v0 / omega;
+        double c2 = v0 / omega;
         ArrayList<Double> coordinates = new ArrayList<>();
 
         while (currentTime < t1) {
