@@ -27,58 +27,111 @@ public class SpringArray {
     private static final List<String> OPENERS = List.of(OPEN_BRACE, OPEN_BRACKET);
     private static final List<String> CLOSERS = List.of(CLOSE_BRACE, CLOSE_BRACKET);
 
-    private static int currentIndex = 0;
-    private static List<Spring> springsList;
+    private static int currentIndex;
+    private static List<Spring> springList;
 
     public static Spring equivalentSpring(String springExpr) {
-        springsList = new ArrayList<>();
-        ArrayList<List<Integer>> indexPairs = getIndexPairs(springExpr);
-        return solve(springExpr, indexPairs);
+        springList = new ArrayList<>();
+        currentIndex = 0;
+        ArrayList<List<Integer>> indexPairs = getIndexesInPairs(springExpr);
+        return getResultingSpring(springExpr, indexPairs);
     }
 
     public static Spring equivalentSpring(String springExpr, Spring[] springs) {
-        springsList = Arrays.stream(springs).collect(Collectors.toList());
-        ArrayList<List<Integer>> indexPairs = getIndexPairs(springExpr);
-        return solve(springExpr, indexPairs);
+        springList = Arrays.stream(springs).collect(Collectors.toList());
+        currentIndex = 0;
+        ArrayList<List<Integer>> indexPairs = getIndexesInPairs(springExpr);
+        return getResultingSpring(springExpr, indexPairs);
     }
 
-    protected static ArrayList<List<Integer>> getIndexPairs(String springExpr) {
-        ArrayList<List<Integer>> indexes = new ArrayList<>();
+    // utility methods
+
+    private static ArrayList<List<Integer>> getIndexesInPairs(String springExpr) {
+        ArrayList<List<Integer>> indexPairs = new ArrayList<>();
 
         for (int i = 0; i < springExpr.length(); i++) {
             if (OPENERS.contains(Character.toString(springExpr.charAt(i)))) {
-                indexes.add(List.of(i, getClosingIndex(springExpr, i)));
+                indexPairs.add(List.of(i, findClosingCharIndex(springExpr, i)));
             }
         }
-        return indexes;
+        return indexPairs;
     }
 
-    private static int getClosingIndex(String springExpr, int index) {
+    private static int findClosingCharIndex(String springExpr, int index) {
 
         String current = Character.toString(springExpr.charAt(index));
         String opener = current.equals(OPEN_BRACE) ? OPEN_BRACE : OPEN_BRACKET;
         String closer = current.equals(OPEN_BRACE) ? CLOSE_BRACE : CLOSE_BRACKET;
 
-        Queue<String> queue = new ArrayDeque<>();
-        queue.add(current);
+        Queue<String> charQueue = new ArrayDeque<>();
+        charQueue.add(current);
 
         for (int i = index + 1; i < springExpr.length(); i++) {
             String currentChar = Character.toString(springExpr.charAt(i));
 
             if (currentChar.equals(closer)) {
-                queue.poll();
+                charQueue.poll();
             } else if (currentChar.equals(opener)) {
-                queue.add(currentChar);
+                charQueue.add(currentChar);
             }
-            if (queue.size() == 0) {
+            if (charQueue.size() == 0) {
                 return i;
             }
         }
         throw new IllegalArgumentException("Invalid Spring Expression");
     }
 
-    private static Spring solve(String springExpr, ArrayList<List<Integer>> indexes) {
-        // TODO
-        return null;
+    private static Spring getResultingSpring(String springExpr, ArrayList<List<Integer>> indexes) {
+        return getResultingSpring(springExpr, indexes, 0, springExpr.length());
+    }
+
+    private static Spring getResultingSpring(String springExpr, ArrayList<List<Integer>> indexes, int start, int end) {
+
+        if(start == end - 1) {
+            if(springList.size() == 0) {
+                return new Spring();
+            } else {
+                return springList.get(currentIndex++);
+            }
+        }
+
+        ArrayList<Spring> subSprings = new ArrayList<>();
+        ArrayList<List<Integer>> filteredIndexParis = indexes.stream().filter(c -> c.get(0) > start
+                && c.get(1) < end).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<List<Integer>> subIndexPairs = new ArrayList<>();
+        int i = 0;
+
+        while (i < filteredIndexParis.size()) {
+            List<Integer> index = filteredIndexParis.get(i);
+            subIndexPairs.add(index);
+                i = findIndex(filteredIndexParis, index);
+            if (i == -1) break;
+        }
+
+        for (List<Integer> subIndexPair : subIndexPairs) {
+            subSprings.add(getResultingSpring(springExpr, indexes, subIndexPair.get(0), subIndexPair.get(1)));
+        }
+
+        Spring spring = subSprings.get(0);
+        if (Character.toString(springExpr.charAt(start)).equals(OPEN_BRACE)) {
+            for (int j = 1; j < subSprings.size(); j++) {
+                spring = spring.inSeries(subSprings.get(j));
+            }
+        } else {
+            for (int j = 1; j < subSprings.size(); j++) {
+                spring = spring.inParallel(subSprings.get(j));
+            }
+        }
+
+        return spring;
+    }
+
+    private static int findIndex(ArrayList<List<Integer>> filteredIndexPairs,  List<Integer> index) {
+        for (int i = 0; i < filteredIndexPairs.size(); i++) {
+            if(filteredIndexPairs.get(i).get(0) == index.get(1) + 1) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

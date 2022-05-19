@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -13,19 +10,31 @@ public class Main {
 
         // For testing
 
-        String expr = "{[{}{}][]}";
-        String expr2 = "{[{[][]}{}][{}]}";
+        String expr = "{[][]}";
+        String expr2 = "[{}{}]";
+        String expr3 = "{[{[][]}{}][{}]}";
 
-        ArrayList<List<Integer>> indexPairs = SpringArray.getIndexPairs(expr);
-        System.out.println("Expression: " + expr);
-        System.out.println("Size: " + expr.length());
-        System.out.println(indexPairs);
+        Spring resultSpring = SpringArray.equivalentSpring(expr);
+        System.out.println("Resulting K: " + resultSpring.getK());
+
+        Spring[] springs = { new Spring(5), new Spring(10 )};
+        Spring resultSpring2 = SpringArray.equivalentSpring(expr2, springs);
+        System.out.println("Resulting K: " + resultSpring2.getK());
 
         System.out.println("------------------------------------------------------------------------------");
+        System.out.println();
 
-        ArrayList<List<Integer>> indexPairs2 = SpringArray.getIndexPairs(expr2);
-        System.out.println("Expression: " + expr2);
-        System.out.println("Size: " + expr2.length());
-        System.out.println(indexPairs2);
+        double[] input = {1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+
+        Complex[] cinput = new Complex[input.length];
+        for (int i = 0; i < input.length; i++)
+            cinput[i] = new Complex(input[i], 0.0);
+
+        FT.fft(cinput);
+
+        System.out.println("Results:");
+        for (Complex c : cinput) {
+            System.out.println(c);
+        }
     }
 }
