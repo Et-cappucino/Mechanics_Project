@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -23,12 +24,30 @@ public class Converter {
         double t1 = 2 * Math.PI;
 
         double[] coordinates = getOscillations(spring, t0, t1, sampleSize);
-        // TO DO
-        return 0;
+        Complex[] amplitudes = getAmplitudes(coordinates, (t1 - t0) / sampleSize);
+        List<Double> frequencies = getFrequencies(amplitudes, (t1 - t0) / sampleSize);
+
+        return getDecimalFromFrequencies(amplitudes, frequencies);
     }
+
 
     private static double[] getOscillations(Spring spring, double start, double end, int n) {
         return spring.move(start, end, end / n, 1, 0, 0.001);
+    }
+
+    private static Complex[] getAmplitudes(double[] coordinates, double rate) {
+        Complex[] amplitudes = doubleToComplex(Arrays.copyOf(coordinates, coordinates.length - 1));
+        FT.fft(amplitudes);
+        return amplitudes;
+    }
+
+    private static List<Double> getFrequencies(Complex[] amplitudes, double rate) {
+        return FT.fftfreq(amplitudes.length, rate);
+    }
+
+    private static double getDecimalFromFrequencies(Complex[] amplitudes, List<Double> frequencies) {
+        // TO DO
+        return 0;
     }
 
     private static Complex[] doubleToComplex(double[] doubles) {

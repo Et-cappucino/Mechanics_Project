@@ -74,11 +74,11 @@ public class FT {
         return max;
     }
 
-    private static List<Double> fftfreq(double n) {
+    protected static List<Double> fftfreq(double n) {
         return fftfreq(n, 1.0);
     }
 
-    private static List<Double> fftfreq(double n, double timeStep) {
+    protected static List<Double> fftfreq(double n, double timeStep) {
         double c = 1 / (n * timeStep);
         double N = Math.floor((n - 1) / 2) + 1;
         List<Double> list1 = fulFillList(0, N);
