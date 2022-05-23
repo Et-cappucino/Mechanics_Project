@@ -3,7 +3,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 
 // getters and constructors are
@@ -15,15 +16,64 @@ import java.util.Arrays;
 @EqualsAndHashCode
 public class Converter {
 
-    public String validate(int[] binaryDigits) {
-        if(binaryDigits.length != 8) {
-            throw new IllegalArgumentException("Number of inputted binary digits should be 8, not " + binaryDigits.length);
+    public static double convert(String bits) {
+        Spring spring = bitsToSpring(bits);
+        int sampleSize = 1024;
+        double t0 = 0;
+        double t1 = 2 * Math.PI;
+
+        double[] coordinates = getOscillations(spring, t0, t1, sampleSize);
+        // TO DO
+        return 0;
+    }
+
+    private static double[] getOscillations(Spring spring, double start, double end, int n) {
+        return spring.move(start, end, end / n, 1, 0, 0.001);
+    }
+
+    private static Complex[] doubleToComplex(double[] doubles) {
+        Complex[] cinput = new Complex[doubles.length];
+        for (int i = 0; i < doubles.length; i++) {
+            cinput[i] = new Complex(doubles[i], 0.0);
         }
-        Arrays.stream(binaryDigits).forEach(digit -> {
-            if (digit != 0 && digit != 1) {
-                throw new IllegalArgumentException("Illegal inputted binary digit " + digit + ", input should be either 1 or 0");
+        return cinput;
+    }
+
+    private static Spring bitsToSpring(String bits) {
+        validate(bits);
+        StringBuilder expression = new StringBuilder("[");
+        List<Spring> springs = new ArrayList<>();
+        String bitsReversed = new StringBuilder(bits).reverse().toString();
+
+        for (int index = 0; index < bitsReversed.length(); index++) {
+            if(bitsReversed.charAt(index) == '1') {
+                expression.append("{}");
+                springs.add(new Spring(Math.pow(2, index)));
             }
-        });
-        return "OK";
+        }
+        expression.append("]");
+        return SpringArray.equivalentSpring(expression.toString(), listToArray(springs));
+    }
+
+    private static Spring[] listToArray(List<Spring> springList) {
+        Spring[] springArray = new Spring[springList.size()];
+        int j = 0;
+        for (Spring spring : springList) {
+            springArray[j] = spring;
+            j++;
+        }
+        return springArray;
+    }
+
+    private static void validate(String bits) {
+        if(bits.length() != 8) {
+            throw new IllegalArgumentException("Number of inputted bits should be 8, not " + bits.length());
+        }
+
+        for (int i = 0; i < bits.length(); i++) {
+            if(bits.charAt(i) != '0' && bits.charAt(i) != '1') {
+                throw new IllegalArgumentException("Illegal input " + bits.charAt(i) + ", input should be either 1 or 0");
+            }
+        }
     }
 }
