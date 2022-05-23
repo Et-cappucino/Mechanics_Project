@@ -2,6 +2,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.log;
@@ -34,7 +38,6 @@ public class FT {
         int bits = (int) (log(buffer.length) / log(2));
 
         for (int j = 1; j < buffer.length / 2; j++) {
-
             int swapPos = bitReverse(j, bits);
             Complex temp = buffer[j];
             buffer[j] = buffer[swapPos];
@@ -44,7 +47,6 @@ public class FT {
         for (int N = 2; N <= buffer.length; N <<= 1) {
             for (int i = 0; i < buffer.length; i += N) {
                 for (int k = 0; k < N / 2; k++) {
-
                     int evenIndex = i + k;
                     int oddIndex = i + k + (N / 2);
                     Complex even = buffer[evenIndex];
@@ -58,5 +60,38 @@ public class FT {
                 }
             }
         }
+    }
+
+    // util methods
+
+    protected static int indexOfMax(Complex[] amplitudes) {
+        int max = 0;
+        for (int i = 0; i < amplitudes.length; i++) {
+            if (amplitudes[max].getRe() < amplitudes[i].getRe()) {
+                max = i;
+            }
+        }
+        return max;
+    }
+
+    private static List<Double> fftfreq(double n) {
+        return fftfreq(n, 1.0);
+    }
+
+    private static List<Double> fftfreq(double n, double timeStep) {
+        double c = 1 / (n * timeStep);
+        double N = Math.floor((n - 1) / 2) + 1;
+        List<Double> list1 = fulFillList(0, N);
+        List<Double> list2 = fulFillList(- Math.floor(n / 2), 0);
+        list1.addAll(list2);
+        return list1.stream().map(num -> num * c).collect(Collectors.toList());
+    }
+
+    private static List<Double> fulFillList(double start, double end) {
+        List<Double> list = new ArrayList<>();
+        for (double i = start; i < end; i++) {
+            list.add(i);
+        }
+        return list;
     }
 }
