@@ -30,6 +30,7 @@ public class Converter {
         return getDecimalFromFrequencies(amplitudes, frequencies);
     }
 
+    // util methods
 
     private static double[] getOscillations(Spring spring, double start, double end, int n) {
         return spring.move(start, end, end / n, 1, 0, 0.001);
@@ -46,8 +47,9 @@ public class Converter {
     }
 
     private static double getDecimalFromFrequencies(Complex[] amplitudes, List<Double> frequencies) {
-        // TO DO
-        return 0;
+        int max = FT.indexOfMax(amplitudes);
+        double omega = frequencies.get(max) * 2 * Math.PI;
+        return Math.round(Math.pow(omega, 2) * 0.001);
     }
 
     private static Complex[] doubleToComplex(double[] doubles) {
